@@ -45,4 +45,5 @@ jobs:
       - name: Integration Tests
         run: |
           # run with root so no permissions issues
-          sudo pytest tests/test_integration.py
+          export PYTEST_PATH=$(which pytest)
+          sudo $PYTEST_PATH tests/test_integration.py

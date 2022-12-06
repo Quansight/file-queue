@@ -114,6 +114,16 @@ class Job:
             with (self.queue.result_directory / self.id).open("rb") as f:
                 return self.queue.result_serializer.loads(f.read())
 
+    @property
+    def wait(self, timeout: float = 30, interval: int = 1):
+        start_time = time.time()
+        while True:
+            if (time.time() - start_time) > timeout:
+                raise TimeoutError(f"Waiting for job {self.id}")
+            elif self.get_status() in [JobStatus.FINISHED, JobStatus.FAILED]:
+                return self.result
+            time.sleep(interval)
+
 
 class Queue:
     def __init__(

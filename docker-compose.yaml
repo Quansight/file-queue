@@ -1,5 +1,8 @@
 version: "3.10"
 
+volumes:
+  ssh_shared:
+
 services:
   ssh-server:
     image: lscr.io/linuxserver/openssh-server:latest
@@ -8,6 +11,11 @@ services:
       USER_PASSWORD: password
     ports:
       - 2222:2222
+    volumes:
+      - ssh_shared:/mnt/ssh_shared/
 
-  worker:
+  host_standard_worker:
     build: .
+    volumes:
+      - ./.queues/:/mnt/host_shared/
+    command: ["file-queue-worker", "--path", "/mnt/host_shared"]

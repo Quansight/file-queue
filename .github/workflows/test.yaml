@@ -38,4 +38,10 @@ jobs:
           twine check dist/*
       - name: Unit Tests
         run: |
-          pytest
+          pytest tests/test_unit.py
+      - name: Startup Integration Test Requirements
+        run: |
+          docker-compose up --build -d
+      - name: Integration Tests
+        run: |
+          pytest tests/test_integration.py

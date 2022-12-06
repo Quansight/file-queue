@@ -1,1 +1,1 @@
-from file_queue.core import Queue, Job, Worker, JobStatus
+from file_queue.core import Queue, Job, Worker, JobStatus  # noqa

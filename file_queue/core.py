@@ -92,7 +92,7 @@ class Job:
             self.set_status(JobStatus.FINISHED)
             with (self.queue.result_directory / self.id).open("wb") as f:
                 f.write(self.queue.result_serializer.dumps(result))
-        except Exception as e:
+        except Exception:
             self.set_status(JobStatus.FAILED)
             with (self.queue.result_directory / self.id).open("w") as f:
                 f.write("".join(traceback.format_stack()))

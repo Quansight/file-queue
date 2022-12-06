@@ -6,6 +6,7 @@ import contextlib
 import importlib
 import traceback
 import time
+from typing import Union
 
 
 class JobStatus(enum.Enum):
@@ -25,7 +26,7 @@ class JSONSerializer:
 
 class DummyLock:
     @contextlib.contextmanager
-    def aquire(self, path: str | pathlib.Path):
+    def aquire(self, path: Union[str, pathlib.Path]):
         yield
 
 
@@ -107,7 +108,7 @@ class Job:
 class Queue:
     def __init__(
         self,
-        directory: str | pathlib.Path,
+        directory: Union[str, pathlib.Path],
         job_serializer_class=JSONSerializer,
         result_serializer_class=JSONSerializer,
         lock_class=DummyLock,

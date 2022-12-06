@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "file_queue"
+description = "File based task queue"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "BSD 3-Clause License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "flake8"]
+extra = ["py-lockfile", "parimiko"]
+
+[project.scripts]
+file-queue-worker = "file_queue.__main__:main"

@@ -1,0 +1,211 @@
+import enum
+import pathlib
+import json
+import uuid
+import contextlib
+import importlib
+import traceback
+import time
+
+
+class JobStatus(enum.Enum):
+    QUEUED = "queued"
+    FINISHED = "finished"
+    FAILED = "failed"
+    STARTED = "started"
+
+
+class JSONSerializer:
+    def loads(self, message: bytes):
+        return json.loads(message)
+
+    def dumps(self, data: bytes):
+        return json.dumps(data).encode("utf-8")
+
+
+class DummyLock:
+    @contextlib.contextmanager
+    def aquire(self, path: str | pathlib.Path):
+        yield
+
+
+class Job:
+    def __init__(
+        self,
+        queue: "Queue",
+        id: str,
+    ):
+        self.queue = queue
+        self.id = id
+
+    @property
+    def job_path(self):
+        return self.queue.job_directory / self.id
+
+    @property
+    def lock_path(self):
+        return (self.queue.job_directory / self.id).with_suffix(".lock")
+
+    @property
+    def _meta(self):
+        with self.job_path.open("rb") as f:
+            return self.queue.job_serializer.loads(f.read())
+
+    def get_status(self):
+        for status in JobStatus:
+            if (self.queue.get_status_directory(status) / self.id).is_symlink():
+                return status
+
+    def claim(self):
+        """Returns True/False depending on if job claim succeeded"""
+        with self.queue.lock.aquire(self.lock_path):
+            current_status = self.get_status()
+            if current_status == JobStatus.QUEUED:
+                self._set_status(JobStatus.STARTED)
+                return True
+            else:
+                return False
+
+    def set_status(self, status: JobStatus = JobStatus.QUEUED):
+        with self.queue.lock.aquire(self.lock_path):
+            self._set_status(status)
+
+    def _set_status(self, status: JobStatus = JobStatus.QUEUED):
+        current_status = self.get_status()
+
+        if current_status == status:
+            return
+
+        if current_status:
+            (self.queue.get_status_directory(current_status) / self.id).unlink()
+        (self.queue.get_status_directory(status) / self.id).symlink_to(self.job_path)
+
+    def __call__(self):
+        meta = self._meta
+        func = getattr(importlib.import_module(meta["module"]), meta["name"])
+        args = meta["args"]
+        kwargs = meta["kwargs"]
+
+        try:
+            self.set_status(JobStatus.STARTED)
+            result = func(*args, **kwargs)
+            self.set_status(JobStatus.FINISHED)
+            with (self.queue.result_directory / self.id).open("wb") as f:
+                f.write(self.queue.result_serializer.dumps(result))
+        except Exception as e:
+            self.set_status(JobStatus.FAILED)
+            with (self.queue.result_directory / self.id).open("w") as f:
+                f.write("".join(traceback.format_stack()))
+
+    @property
+    def result(self):
+        if self.get_status() in [JobStatus.FINISHED, JobStatus.FAILED]:
+            with (self.queue.result_directory / self.id).open("rb") as f:
+                return self.queue.result_serializer.loads(f.read())
+
+
+class Queue:
+    def __init__(
+        self,
+        directory: str | pathlib.Path,
+        job_serializer_class=JSONSerializer,
+        result_serializer_class=JSONSerializer,
+        lock_class=DummyLock,
+        job_class=Job,
+    ):
+        self.directory = pathlib.Path(directory)
+        self.job_serializer = job_serializer_class()
+        self.result_serializer = result_serializer_class()
+        self.lock = lock_class()
+        self.ensure_directories()
+
+    def ensure_directories(self):
+        self.job_directory.mkdir(exist_ok=True)
+        self.result_directory.mkdir(exist_ok=True)
+        self.queued_directory.mkdir(exist_ok=True)
+        self.finished_directory.mkdir(exist_ok=True)
+        self.failed_directory.mkdir(exist_ok=True)
+        self.started_directory.mkdir(exist_ok=True)
+
+    def enqueue(self, func, *args, **kwargs):
+        job_name = str(uuid.uuid4())
+        job = Job(queue=self, id=job_name)
+        job_message = {
+            "module": func.__module__,
+            "name": func.__name__,
+            "args": args,
+            "kwargs": kwargs,
+        }
+        with job.job_path.open("wb") as f:
+            f.write(self.job_serializer.dumps(job_message))
+
+        job.set_status(JobStatus.QUEUED)
+        return job
+
+    def dequeue(self, timeout: float = 30, interval: int = 1):
+        start_time = time.time()
+        while True:
+            if (time.time() - start_time) > timeout:
+                raise TimeoutError("Failed to dequeue job")
+
+            for filename in self.queued_directory.iterdir():
+                job_name = filename.name
+                job = Job(queue=self, id=job_name)
+                if job.claim():
+                    return job
+            time.sleep(interval)
+
+    @property
+    def job_directory(self):
+        return self.directory / "tasks"
+
+    @property
+    def result_directory(self):
+        return self.directory / "results"
+
+    @property
+    def queued_directory(self):
+        return self.directory / JobStatus.QUEUED.value
+
+    @property
+    def finished_directory(self):
+        return self.directory / JobStatus.FINISHED.value
+
+    @property
+    def failed_directory(self):
+        return self.directory / JobStatus.FAILED.value
+
+    @property
+    def started_directory(self):
+        return self.directory / JobStatus.STARTED.value
+
+    def get_status_directory(self, status: JobStatus):
+        if status == JobStatus.QUEUED:
+            return self.queued_directory
+        elif status == JobStatus.STARTED:
+            return self.started_directory
+        elif status == JobStatus.FINISHED:
+            return self.finished_directory
+        elif status == JobStatus.FAILED:
+            return self.failed_directory
+
+    def stats(self):
+        return {
+            "queued": len(list(self.queued_directory.iterdir())),
+            "started": len(list(self.started_directory.iterdir())),
+            "finished": len(list(self.finished_directory.iterdir())),
+            "failed": len(list(self.failed_directory.iterdir())),
+        }
+
+
+class Worker:
+    def __init__(
+        self,
+        queue: Queue,
+    ):
+        self.queue = Queue
+
+    def run(self):
+        while True:
+            job = self.queue.dequeue()
+            job()

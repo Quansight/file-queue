@@ -14,7 +14,7 @@ classifiers = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["pytest", "black", "flake8"]
+dev = ["pytest", "black", "flake8", "build", "twine"]
 extra = ["filelock", "paramiko"]
 
 [project.scripts]

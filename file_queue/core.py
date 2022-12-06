@@ -1,3 +1,4 @@
+import logging
 import enum
 import pathlib
 import json
@@ -7,6 +8,11 @@ import importlib
 import traceback
 import time
 from typing import Union
+
+from file_queue import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 class JobStatus(enum.Enum):
@@ -38,6 +44,10 @@ class Job:
     ):
         self.queue = queue
         self.id = id
+
+    def __str__(self):
+        meta = self._meta
+        return f"<Job {meta['module']}.{meta['name']}(*{meta['args']}, **{meta['kwargs']})>"
 
     @property
     def job_path(self):
@@ -114,11 +124,14 @@ class Queue:
         lock_class=DummyLock,
         job_class=Job,
     ):
-        self.directory = pathlib.Path(directory)
+        self.directory = pathlib.Path(directory).resolve()
         self.job_serializer = job_serializer_class()
         self.result_serializer = result_serializer_class()
         self.lock = lock_class()
         self.ensure_directories()
+
+    def __repr__(self):
+        return f"<Queue directory={self.directory}>"
 
     def ensure_directories(self):
         self.job_directory.mkdir(exist_ok=True)
@@ -204,9 +217,14 @@ class Worker:
         self,
         queue: Queue,
     ):
-        self.queue = Queue
+        self.queue = queue
 
     def run(self):
+        logger.info(f"Starting worker on queue={self.queue}")
         while True:
-            job = self.queue.dequeue()
-            job()
+            try:
+                job = self.queue.dequeue()
+                with utils.timer(logger, str(job)):
+                    job()
+            except TimeoutError:
+                pass

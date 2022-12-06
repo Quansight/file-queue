@@ -1,7 +1,7 @@
 FROM python:3.10
 
-COPY . /opt/
+COPY ./ /opt/file-queue/
 
-ENV PYTHONPATH=$PYTHONPATH:/opt/
+RUN pip install /opt/file-queue/
 
-RUN pip install dask distributed
+CMD ["file-queue-worker"]

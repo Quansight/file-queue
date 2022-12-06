@@ -114,7 +114,6 @@ class Job:
             with (self.queue.result_directory / self.id).open("rb") as f:
                 return self.queue.result_serializer.loads(f.read())
 
-    @property
     def wait(self, timeout: float = 30, interval: int = 1):
         start_time = time.time()
         while True:

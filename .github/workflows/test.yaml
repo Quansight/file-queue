@@ -7,15 +7,12 @@ on:
       - master
 
 jobs:
-  test-conda-store-server:
-    name: 'Test conda-store-server'
+  test-file-queue:
+    name: 'Test file-queue'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: conda-store-server
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@master
@@ -26,12 +23,11 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install .[extra,dev]
-          sudo apt install wait-for-it -y
       - name: Black Formatting
         run: |
           black --version
-          black conda_store_server --diff
-          black --check conda_store_server
+          black file_queue --diff
+          black --check file_queue
       - name: Flake8 Formatting
         run: |
           flake8 --version

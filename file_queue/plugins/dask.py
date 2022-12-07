@@ -1,6 +1,6 @@
 import logging
 
-from file_queue.core import Worker, Queue
+from file_queue.core import Worker, Queue, Job
 
 import dask.distributed
 import dask

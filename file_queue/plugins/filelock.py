@@ -1,4 +1,6 @@
+import pathlib
 import contextlib
+from typing import Union
 
 import filelock
 

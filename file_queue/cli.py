@@ -50,7 +50,6 @@ def handle_cli(args):
         lock_class=args.lock_class,
         job_class=args.job_class,
     )
-    print(type(queue), type(args.queue_class))
     worker = args.worker_class(
         queue=queue,
     )

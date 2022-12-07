@@ -1,3 +1,4 @@
+import sys
 import logging
 import enum
 import pathlib
@@ -145,6 +146,7 @@ class Queue:
     def ensure_directories(self):
         self.job_directory.mkdir(exist_ok=True)
         self.result_directory.mkdir(exist_ok=True)
+        self.worker_directory.mkdir(exist_ok=True)
         self.queued_directory.mkdir(exist_ok=True)
         self.finished_directory.mkdir(exist_ok=True)
         self.failed_directory.mkdir(exist_ok=True)
@@ -187,6 +189,10 @@ class Queue:
         return self.directory / "results"
 
     @property
+    def worker_directory(self):
+        return self.directory / "workers"
+
+    @property
     def queued_directory(self):
         return self.directory / JobStatus.QUEUED.value
 
@@ -225,15 +231,45 @@ class Worker:
     def __init__(
         self,
         queue: Queue,
+        id: str = None,
     ):
         self.queue = queue
+        self.id = id or str(uuid.uuid4())
+        self.job_check_interval = 1
+        self.heartbeat_interval = 30
+
+    @property
+    def worker_path(self):
+        return self.queue.worker_directory / self.id
+
+    def register_worker(self):
+        self.worker_path.touch()
+
+    def unregister_worker(self):
+        self.worker_path.unlink(missing_ok=True)
+
+    def check_shutdown(self):
+        if not self.worker_path.exists():
+            logger.info(f"Stopping worker {self.id} due to shutdown command")
+            sys.exit(0)
+
+    def send_heartbeat(self):
+        self.worker_path.touch()
 
     def run(self):
-        logger.info(f"Starting worker on queue={self.queue}")
-        while True:
-            try:
-                job = self.queue.dequeue()
-                with utils.timer(logger, str(job)):
-                    job()
-            except TimeoutError:
-                pass
+        logger.info(f"Starting worker {self.id} on queue={self.queue}")
+        try:
+            self.register_worker()
+            while True:
+                self.check_shutdown()
+                # must send heartbeat after shutdown check
+                # since heartbeat will create file if it doesn't exist
+                self.send_heartbeat()
+                try:
+                    job = self.queue.dequeue()
+                    with utils.timer(logger, str(job)):
+                        job()
+                except TimeoutError:
+                    pass
+        finally:
+            self.unregister_worker()

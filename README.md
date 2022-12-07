@@ -2,15 +2,6 @@
 
 A task queue using the filesystem as the message queue.
 
-# CLI
-
-Starting a worker is as simple as giving a filesystem directory where
-the queue will reside.
-
-```shell
-file-queue-worker --path ./path/to/queue
-```
-
 # API
 
 Creating a queue is as simple as supplying a directory where the queue
@@ -43,3 +34,17 @@ You can wait on the job to finish
 ```python
 result = job.wait()
 ```
+
+# Worker
+
+Starting a worker is as simple as giving a filesystem directory where
+the queue will reside.
+
+```shell
+file-queue-worker --path ./path/to/queue
+```
+
+A worker run a continuous loop gathering tasks in the task queue. The
+worker creates a file `path/to/queue/workers/<worker-id>` where it will:
+ - continuously touch the file every 30 seconds
+ - check that the file exists and if not stop the worker

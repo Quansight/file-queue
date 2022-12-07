@@ -13,6 +13,11 @@
         pythonPackages = pkgs.python3Packages;
       in pkgs.mkShell {
         buildInputs = [
+          pythonPackages.filelock
+          pythonPackages.dask
+          pythonPackages.distributed
+          pythonPackages.paramiko
+
           pythonPackages.pytest
           pythonPackages.black
           pythonPackages.flake8

@@ -4,6 +4,7 @@ import pathlib
 import urllib.parse
 from typing import Union
 
+import paramiko
 from paramiko.client import SSHClient
 
 from file_queue.core import Queue, JSONSerializer, DummyLock, Job
@@ -27,11 +28,11 @@ class SSHQueue(Queue):
             job_class=job_class,
         )
 
-    def _create_client(self):
-        if not self.directory.startswith("ssh://"):
+    def _create_client(self, directory):
+        if not directory.startswith("ssh://"):
             raise ValueError("directory must start with ssh://")
 
-        p = urllib.parse.urlparse(self.directory)
+        p = urllib.parse.urlparse(directory)
         params = {
             "hostname": p.hostname,
             "port": int(p.port or 22),
@@ -41,6 +42,7 @@ class SSHQueue(Queue):
         }
 
         self._ssh_client = SSHClient()
+        self._ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._ssh_client.connect(
             hostname=params["hostname"],
             port=params["port"],
@@ -62,7 +64,12 @@ class SSHQueue(Queue):
             self.started_directory,
         ]:
             commands.append(f"mkdir -p {directory}")
-        self._ssh_client.exec_command(" && ".join(commands))
+        commands.append('echo "done"')
+        stdin, stdout, stderr = self._ssh_client.exec_command(" && ".join(commands))
+        if stdout.read() != b"done\n":
+            raise Exception(
+                f'failed to create directories on remote machine with error {stderr.read().decode("utf-8")}'
+            )
 
     def enqueue(self, func, *args, **kwargs):
         job_name = str(uuid.uuid4())
@@ -73,14 +80,21 @@ class SSHQueue(Queue):
             "args": args,
             "kwargs": kwargs,
         }
-        with self._sftp_client.open(job.job_path, "wb") as f:
+        with self._sftp_client.open(str(job.job_path), "wb") as f:
             f.write(self.job_serializer.dumps(job_message))
 
-        self._sftp_client.symlink(self.queued_directory / job.id, job.job_path)
+        self._sftp_client.symlink(
+            str(job.job_path), str(self.queued_directory / job.id)
+        )
         return job
 
     def dequeue(self, timeout: float = 30, interval: int = 1):
         raise NotImplementedError()
 
     def stats(self):
-        raise NotImplementedError()
+        return {
+            "queued": len(self._stfp_client.listdir(self.queued_directory)),
+            "started": len(self._sftp_client.listdir(self.started_directory)),
+            "finished": len(self._sftp_client.listdir(self.finished_directory)),
+            "failed": len(self._sftp_client.listdir(self.failed_directory)),
+        }

@@ -23,7 +23,9 @@ def cli():
     parser.add_argument(
         "--queue-class", type=class_import, default="fs_task_queue.core.Queue"
     )
-    parser.add_argument("--job-class", type=class_import, default="fs_task_queue.core.Job")
+    parser.add_argument(
+        "--job-class", type=class_import, default="fs_task_queue.core.Job"
+    )
     parser.add_argument(
         "--worker-class", type=class_import, default="fs_task_queue.core.Worker"
     )

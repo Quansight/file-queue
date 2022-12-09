@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fs-task-queue"
+version = "0.1.2"
 description = "Filesystem based task queue"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -11,7 +12,6 @@ license = {text = "BSD 3-Clause License"}
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
-dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "build", "twine"]

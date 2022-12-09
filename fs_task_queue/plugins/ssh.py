@@ -73,8 +73,8 @@ class SSHQueue(Queue):
             "port": int(p.port or 22),
             "username": p.username or os.getlogin(),
             "password": p.password,
-            "key_file": os.environ.get('PARAMIKO_SSH_KEYFILE'),
-            "passphrase": os.environ.get('PARAMIKO_SSH_PASSPHRASE'),
+            "key_file": os.environ.get("PARAMIKO_SSH_KEYFILE"),
+            "passphrase": os.environ.get("PARAMIKO_SSH_PASSPHRASE"),
             "path": p.path,
         }
 

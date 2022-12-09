@@ -53,7 +53,15 @@ the queue will reside.
 file-queue-worker --path ./path/to/queue
 ```
 
-A worker run a continuous loop gathering tasks in the task queue. The
-worker creates a file `path/to/queue/workers/<worker-id>` where it will:
+A `dask` worker is supported via `file_queue.plugin.dask.DaskWorker`
+for sending jobs to the dask cluster instead of executing locally.
+
+A worker runs a continuous loop gathering tasks in the task queue. The
+worker creates a file `path/to/queue/workers/<worker-id>` where it
+will:
  - continuously touch the file every 30 seconds
  - check that the file exists and if not stop the worker
+
+# License
+
+[BSD-3]()

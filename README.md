@@ -29,7 +29,7 @@ results in 2-4 IOPS on the filesystem.
 
 # Install
 
- - `pip install fs-queue`
+ - `pip install fs-task-queue`
 
 # API
 
@@ -37,7 +37,7 @@ Creating a queue is as simple as supplying a directory where the queue
 will reside.
 
 ```python
-from fs_queue import Queue
+from fs_task_queue import Queue
 
 queue = Queue("path/to/queue")
 ```
@@ -46,7 +46,7 @@ Submitting jobs and monitoring over SSH is also supported via the same
 interface. Workers currently cannot connect over SSH.
 
 ```python
-from fs_queue.plugins import SSHQueue
+from fs_task_queue.plugins import SSHQueue
 
 queue = SSHQueue("ssh://<username>:<password>@<hostname>:<port>/<path>")
 ```
@@ -79,10 +79,10 @@ Starting a worker is as simple as giving a filesystem directory where
 the queue will reside.
 
 ```shell
-fs-queue-worker --path ./path/to/queue
+fs-task-queue-worker --path ./path/to/queue
 ```
 
-A `dask` worker is supported via `fs_queue.plugin.dask.DaskWorker`
+A `dask` worker is supported via `fs_task_queue.plugin.dask.DaskWorker`
 for sending jobs to the dask cluster instead of executing locally.
 
 A worker runs a continuous loop gathering tasks in the task queue. The

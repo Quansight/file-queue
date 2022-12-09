@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-file-queue:
-    name: 'Test file-queue'
+    name: 'Test fs-task-queue'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,8 +26,8 @@ jobs:
       - name: Black Formatting
         run: |
           black --version
-          black file_queue --diff
-          black --check file_queue
+          black fs_task_queue --diff
+          black --check fs_task_queue
       - name: Flake8 Formatting
         run: |
           flake8 --version

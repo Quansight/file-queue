@@ -7,7 +7,7 @@ from typing import Union
 import paramiko
 from paramiko.client import SSHClient
 
-from fs_queue.core import Queue, JSONSerializer, DummyLock, Job, JobStatus
+from fs_task_queue.core import Queue, JSONSerializer, DummyLock, Job, JobStatus
 
 
 class SSHJob(Job):

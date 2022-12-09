@@ -1,5 +1,5 @@
 import file_queue
-from fs_queue.plugins.ssh import SSHQueue
+from fs_task_queue.plugins.ssh import SSHQueue
 
 import operator
 

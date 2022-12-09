@@ -1,4 +1,4 @@
-from fs_queue.cli import cli
+from fs_task_queue.cli import cli
 
 
 def main():

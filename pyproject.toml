@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fs-queue"
+name = "fs-task-queue"
 description = "Filesystem based task queue"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -18,4 +18,4 @@ dev = ["pytest", "black", "flake8", "build", "twine"]
 extra = ["filelock", "paramiko", "dask", "distributed"]
 
 [project.scripts]
-fs-queue-worker = "fs_queue.__main__:main"
+fs-task-queue-worker = "fs_task_queue.__main__:main"

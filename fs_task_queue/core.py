@@ -10,7 +10,7 @@ import traceback
 import time
 from typing import Union
 
-from fs_queue import utils
+from fs_task_queue import utils
 
 
 logger = logging.getLogger(__name__)

@@ -22,7 +22,10 @@ or using a database is highly encouraged instead of using
 
 Keep in mind that task state is managed on the filesystem. So do not
 use this if you have an enormous amount of tasks. Think of possibly
-chunking them.
+chunking them or using plugins like
+`file_queue.plugins.dask.DaskWorker` to send tasks to dask (then
+breaking it into many small tasks). Each task state modifications
+results in 2-4 IOPS on the filesystem.
 
 # API
 

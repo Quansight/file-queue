@@ -22,4 +22,4 @@ def test_submit_dask_standard_pass():
     queue = file_queue.Queue(".queues/dask")
     job = queue.enqueue(operator.add, 7, 11)
     result = job.wait()
-    assert result == 7
+    assert result == 18

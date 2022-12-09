@@ -48,7 +48,7 @@ class Job:
 
     def __str__(self):
         meta = self._meta
-        return f"<Job {meta['module']}.{meta['name']}(*{meta['args']}, **{meta['kwargs']})>"
+        return f"<{self.__class__.__name__} {meta['module']}.{meta['name']}(*{meta['args']}, **{meta['kwargs']})>"
 
     @property
     def job_path(self):
@@ -138,6 +138,7 @@ class Queue:
         self.job_serializer = job_serializer_class()
         self.result_serializer = result_serializer_class()
         self.lock = lock_class()
+        self.job_class = job_class
         self.ensure_directories()
 
     def __repr__(self):
@@ -154,7 +155,7 @@ class Queue:
 
     def enqueue(self, func, *args, **kwargs):
         job_name = str(uuid.uuid4())
-        job = Job(queue=self, id=job_name)
+        job = self.job_class(queue=self, id=job_name)
         job_message = {
             "module": func.__module__,
             "name": func.__name__,

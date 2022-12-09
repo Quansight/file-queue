@@ -4,41 +4,36 @@ volumes:
   ssh_shared:
 
 services:
-  initializer:
-    image: alpine
-    restart: "no"
-    # hack to set perimssions on volume
-    entrypoint: |
-      /bin/sh -c "mkdir -p /mnt/ssh_shared && chown -R 911:911 /mnt/ssh_shared"
-    volumes:
-      - ssh_shared:/mnt/
+  # initializer:
+  #   image: alpine
+  #   restart: "no"
+  #   # hack to set perimssions on volume
+  #   entrypoint: |
+  #     /bin/sh -c "mkdir -p /mnt/ssh_shared && chown -R 911:911 /mnt/"
+  #   volumes:
+  #     - ssh_shared:/mnt/
 
   ssh-server:
-    image: lscr.io/linuxserver/openssh-server:latest
-    depends_on:
-      initializer:
-        condition: service_completed_successfully
-    environment:
-      PASSWORD_ACCESS: "true"
-      USER_NAME: username
-      USER_PASSWORD: password
-      SUDO_ACCESS: "true"
+    build:
+      context: .
+      dockerfile: Dockerfile.openssh
     ports:
-      - 2222:2222
+      - 2222:22
     volumes:
-      - ssh_shared:/mnt/
+      - ssh_shared:/mnt/ssh_shared
 
   host_standard_worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.file-queue
     volumes:
       - ./.queues/:/mnt/host_shared/
     command: ["file-queue-worker", "--path", "/mnt/host_shared"]
 
   ssh_standard_worker:
-    build: .
-    depends_on:
-      initializer:
-        condition: service_completed_successfully
+    build:
+      context: .
+      dockerfile: Dockerfile.file-queue
     volumes:
-      - ssh_shared:/mnt/
+      - ssh_shared:/mnt/ssh_shared
     command: ["file-queue-worker", "--path", "/mnt/ssh_shared"]

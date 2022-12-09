@@ -7,7 +7,38 @@ from typing import Union
 import paramiko
 from paramiko.client import SSHClient
 
-from file_queue.core import Queue, JSONSerializer, DummyLock, Job
+from file_queue.core import Queue, JSONSerializer, DummyLock, Job, JobStatus
+
+
+class SSHJob(Job):
+    @property
+    def _meta(self):
+        with self.queue._sftp_client.open(str(self.job_path), "rb") as f:
+            return self.queue.job_serializer.loads(f.read())
+
+    def get_status(self):
+        for status in JobStatus:
+            try:
+                if self.queue._sftp_client.lstat(str(self.queue.get_status_directory(status) / self.id)):
+                    return status
+            except FileNotFoundError:
+                pass
+
+    # mutating operations not implemented for ssh interface
+    def set_status(self):
+        raise NotImplementedError()
+
+    def claim(self):
+        raise NotImplementedError()
+
+    def __call__(self):
+        raise NotImplementedError()
+
+    @property
+    def result(self):
+        if self.get_status() in [JobStatus.FINISHED, JobStatus.FAILED]:
+            with self.queue._sftp_client.open(str(self.queue.result_directory / self.id), "rb") as f:
+                return self.queue.result_serializer.loads(f.read())
 
 
 class SSHQueue(Queue):
@@ -17,7 +48,7 @@ class SSHQueue(Queue):
         job_serializer_class=JSONSerializer,
         result_serializer_class=JSONSerializer,
         lock_class=DummyLock,
-        job_class=Job,
+        job_class=SSHJob,
     ):
         directory = self._create_client(directory)
         super().__init__(
@@ -73,7 +104,7 @@ class SSHQueue(Queue):
 
     def enqueue(self, func, *args, **kwargs):
         job_name = str(uuid.uuid4())
-        job = Job(queue=self, id=job_name)
+        job = self.job_class(queue=self, id=job_name)
         job_message = {
             "module": func.__module__,
             "name": func.__name__,

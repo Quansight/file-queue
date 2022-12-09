@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "file_queue"
+name = "file-queue"
 description = "File based task queue"
 readme = "README.md"
 requires-python = ">=3.7"

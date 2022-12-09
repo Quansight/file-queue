@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile.file-queue
     volumes:
       - ./.queues/host/:/mnt/host_shared/
-    command: ["file-queue-worker", "--path", "/mnt/host_shared"]
+    command: ["fs-task-queue-worker", "--path", "/mnt/host_shared"]
 
   ssh_standard_worker:
     build:
@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile.file-queue
     volumes:
       - ssh_shared:/mnt/ssh_shared
-    command: ["file-queue-worker", "--path", "/mnt/ssh_shared"]
+    command: ["fs-task-queue-worker", "--path", "/mnt/ssh_shared"]
 
   dask_standard_worker:
     build:
@@ -35,4 +35,4 @@ services:
       dockerfile: Dockerfile.file-queue
     volumes:
       - ./.queues/dask/:/mnt/dask_shared
-    command: ["file-queue-worker", "--path", "/mnt/dask_shared", "--worker-class", "file_queue.plugins.dask.DaskWorker"]
+    command: ["fs-task-queue-worker", "--path", "/mnt/dask_shared", "--worker-class", "file_queue.plugins.dask.DaskWorker"]

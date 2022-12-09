@@ -8,24 +8,24 @@ def cli():
     parser.add_argument("--path", type=str, default=".")
     parser.add_argument("--log-level", type=logging_level, default="INFO")
     parser.add_argument(
-        "--lock-class", type=class_import, default="file_queue.core.DummyLock"
+        "--lock-class", type=class_import, default="fs_task_queue.core.DummyLock"
     )
     parser.add_argument(
         "--job-serializer-class",
         type=class_import,
-        default="file_queue.core.JSONSerializer",
+        default="fs_task_queue.core.JSONSerializer",
     )
     parser.add_argument(
         "--result-serializer-class",
         type=class_import,
-        default="file_queue.core.JSONSerializer",
+        default="fs_task_queue.core.JSONSerializer",
     )
     parser.add_argument(
-        "--queue-class", type=class_import, default="file_queue.core.Queue"
+        "--queue-class", type=class_import, default="fs_task_queue.core.Queue"
     )
-    parser.add_argument("--job-class", type=class_import, default="file_queue.core.Job")
+    parser.add_argument("--job-class", type=class_import, default="fs_task_queue.core.Job")
     parser.add_argument(
-        "--worker-class", type=class_import, default="file_queue.core.Worker"
+        "--worker-class", type=class_import, default="fs_task_queue.core.Worker"
     )
     args = parser.parse_args()
     return handle_cli(args)

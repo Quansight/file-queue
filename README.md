@@ -13,6 +13,15 @@ from file_queue import Queue
 queue = Queue("path/to/queue")
 ```
 
+Submitting jobs and monitoring over SSH is also supported via the same
+interface. Workers currently cannot connect over SSH.
+
+```python
+from file_queue.plugins import SSHQueue
+
+queue = SSHQueue("ssh://<username>:<password>@<hostname>:<port>/<path>")
+```
+
 Next we can submit/enqueue jobs to the queue.
 
 ```python

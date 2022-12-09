@@ -15,7 +15,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "build", "twine"]
-extra = ["filelock", "paramiko"]
+extra = ["filelock", "paramiko", "dask", "distributed"]
 
 [project.scripts]
 file-queue-worker = "file_queue.__main__:main"

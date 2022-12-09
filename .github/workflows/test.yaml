@@ -38,7 +38,7 @@ jobs:
           twine check dist/*
       - name: Unit Tests
         run: |
-          pytest tests/test_unit.py
+          pytest tests/test_unit.py -v
       - name: Startup Integration Test Requirements
         run: |
           docker-compose up --build -d
@@ -46,4 +46,4 @@ jobs:
         run: |
           # run with root so no permissions issues
           export PYTEST_PATH=$(which pytest)
-          sudo $PYTEST_PATH tests/test_integration.py
+          sudo $PYTEST_PATH tests/test_integration.py -v

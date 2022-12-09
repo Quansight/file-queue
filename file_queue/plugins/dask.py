@@ -2,22 +2,41 @@ import logging
 
 from file_queue.core import Worker, Queue, Job
 
-import dask.distributed
-import dask
+import distributed
 
 
 logger = logging.getLogger(__name__)
 
 
-class MuliProcessingDaskWorker(Worker):
-    def __init__(self, queue: Queue, threads_per_worker: int = 4, n_workers: int = 1):
+def execute_function(job: Job):
+    job()
+
+
+class DaskWorker(Worker):
+    def __init__(self, queue: Queue, client: distributed.Client = None, **kwargs):
         super().__init__(queue)
-        self.client = dask.distributed.Client(
-            threads_per_worker=threads_per_worker, n_workers=n_workers
-        )
+        if client is None:
+            self.client = distributed.Client(**kwargs)
+        else:
+            self.client = client
 
     def run(self):
-        pass
+        logger.info(f"Starting worker {self.id} on queue={self.queue}")
+        try:
+            self.register_worker()
+            while True:
+                self.check_shutdown()
+                # must send heartbeat after shutdown check
+                # since heartbeat will create file if it doesn't exist
+                self.send_heartbeat()
+                try:
+                    job = self.queue.dequeue()
+                    logger.info("Submitted job {job} via dask client")
+                    self.client.submit(execute_function, job)
+                except TimeoutError:
+                    pass
+        finally:
+            self.unregister_worker()
 
 
 class DaskJob(Job):

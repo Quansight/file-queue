@@ -31,7 +31,7 @@ class DaskWorker(Worker):
                 self.send_heartbeat()
                 try:
                     job = self.queue.dequeue()
-                    logger.info("Submitted job {job} via dask client")
+                    logger.info(f"Submitted job {job} via dask client")
                     self.client.submit(execute_function, job)
                 except TimeoutError:
                     pass

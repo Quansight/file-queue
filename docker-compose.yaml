@@ -4,21 +4,12 @@ volumes:
   ssh_shared:
 
 services:
-  # initializer:
-  #   image: alpine
-  #   restart: "no"
-  #   # hack to set perimssions on volume
-  #   entrypoint: |
-  #     /bin/sh -c "mkdir -p /mnt/ssh_shared && chown -R 911:911 /mnt/"
-  #   volumes:
-  #     - ssh_shared:/mnt/
-
   ssh-server:
     build:
       context: .
       dockerfile: Dockerfile.openssh
     ports:
-      - 2222:22
+      - "2222:22"
     volumes:
       - ssh_shared:/mnt/ssh_shared
 

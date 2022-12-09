@@ -1,3 +1,9 @@
+# [0.1.4] 12/09/2022
+
+## Fixed
+ 
+ - typo in key_filename
+
 # [0.1.3] 12/09/2022
 
 ## Added

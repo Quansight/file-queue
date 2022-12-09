@@ -73,7 +73,7 @@ class SSHQueue(Queue):
             "port": int(p.port or 22),
             "username": p.username or os.getlogin(),
             "password": p.password,
-            "key_file": os.environ.get("PARAMIKO_SSH_KEYFILE"),
+            "key_filename": os.environ.get("PARAMIKO_SSH_KEYFILE"),
             "passphrase": os.environ.get("PARAMIKO_SSH_PASSPHRASE"),
             "path": p.path,
         }
@@ -85,7 +85,7 @@ class SSHQueue(Queue):
             port=params["port"],
             username=params["username"],
             password=params["password"],
-            key_file=params["key_file"],
+            key_filename=params["key_filename"],
             passphrase=params["passphrase"],
         )
         self._sftp_client = self._ssh_client.open_sftp()

@@ -19,7 +19,9 @@ class SSHJob(Job):
     def get_status(self):
         for status in JobStatus:
             try:
-                if self.queue._sftp_client.lstat(str(self.queue.get_status_directory(status) / self.id)):
+                if self.queue._sftp_client.lstat(
+                    str(self.queue.get_status_directory(status) / self.id)
+                ):
                     return status
             except FileNotFoundError:
                 pass
@@ -37,7 +39,9 @@ class SSHJob(Job):
     @property
     def result(self):
         if self.get_status() in [JobStatus.FINISHED, JobStatus.FAILED]:
-            with self.queue._sftp_client.open(str(self.queue.result_directory / self.id), "rb") as f:
+            with self.queue._sftp_client.open(
+                str(self.queue.result_directory / self.id), "rb"
+            ) as f:
                 return self.queue.result_serializer.loads(f.read())
 
 

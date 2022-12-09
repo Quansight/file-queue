@@ -1,4 +1,4 @@
-# File Queue
+# Filesystem Task Queue
 
 A task queue using the filesystem as the message queue. This project
 was motivated by the use case where it is hard or near impossible to
@@ -27,13 +27,17 @@ chunking them or using plugins like
 breaking it into many small tasks). Each task state modifications
 results in 2-4 IOPS on the filesystem.
 
+# Install
+
+ - `pip install fs-queue`
+
 # API
 
 Creating a queue is as simple as supplying a directory where the queue
 will reside.
 
 ```python
-from file_queue import Queue
+from fs_queue import Queue
 
 queue = Queue("path/to/queue")
 ```
@@ -42,7 +46,7 @@ Submitting jobs and monitoring over SSH is also supported via the same
 interface. Workers currently cannot connect over SSH.
 
 ```python
-from file_queue.plugins import SSHQueue
+from fs_queue.plugins import SSHQueue
 
 queue = SSHQueue("ssh://<username>:<password>@<hostname>:<port>/<path>")
 ```
@@ -75,10 +79,10 @@ Starting a worker is as simple as giving a filesystem directory where
 the queue will reside.
 
 ```shell
-file-queue-worker --path ./path/to/queue
+fs-queue-worker --path ./path/to/queue
 ```
 
-A `dask` worker is supported via `file_queue.plugin.dask.DaskWorker`
+A `dask` worker is supported via `fs_queue.plugin.dask.DaskWorker`
 for sending jobs to the dask cluster instead of executing locally.
 
 A worker runs a continuous loop gathering tasks in the task queue. The
@@ -89,4 +93,4 @@ will:
 
 # License
 
-[BSD-3]()
+[BSD-3](./LICENSE)

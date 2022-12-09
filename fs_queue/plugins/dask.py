@@ -1,6 +1,6 @@
 import logging
 
-from file_queue.core import Worker, Queue, Job
+from fs_queue.core import Worker, Queue, Job
 
 import distributed
 

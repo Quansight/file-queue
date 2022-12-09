@@ -1,4 +1,4 @@
-from file_queue import Queue, JobStatus
+from fs_queue import Queue, JobStatus
 
 
 def add(a: int, b: int):

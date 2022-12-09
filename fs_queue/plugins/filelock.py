@@ -4,7 +4,7 @@ from typing import Union
 
 import filelock
 
-from file_queue.core import DummyLock
+from fs_queue.core import DummyLock
 
 
 class FileLock(DummyLock):

@@ -132,7 +132,7 @@ class SSHQueue(Queue):
 
     def stats(self):
         return {
-            "queued": len(self._stfp_client.listdir(self.queued_directory)),
+            "queued": len(self._sftp_client.listdir(self.queued_directory)),
             "started": len(self._sftp_client.listdir(self.started_directory)),
             "finished": len(self._sftp_client.listdir(self.finished_directory)),
             "failed": len(self._sftp_client.listdir(self.failed_directory)),

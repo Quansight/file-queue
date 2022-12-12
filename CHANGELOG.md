@@ -1,3 +1,9 @@
+# [0.1.5] 12/12/2022
+
+## Fixed
+
+ - typo in ssh queue stats
+
 # [0.1.4] 12/09/2022
 
 ## Fixed

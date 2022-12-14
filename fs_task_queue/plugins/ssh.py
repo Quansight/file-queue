@@ -75,6 +75,8 @@ class SSHQueue(Queue):
             "password": p.password,
             "key_filename": os.environ.get("PARAMIKO_SSH_KEYFILE"),
             "passphrase": os.environ.get("PARAMIKO_SSH_PASSPHRASE"),
+            "allow_agent": eval_boolean_env_var("PARAMIKO_SSH_ALLOW_AGENT", True),
+            "look_for_keys": eval_boolean_env_var("PARAMIKO_SSH_LOOK_FOR_KEYS", True),
             "path": p.path,
         }
 
@@ -85,6 +87,8 @@ class SSHQueue(Queue):
             port=params["port"],
             username=params["username"],
             password=params["password"],
+            look_for_keys=params["look_for_keys"],
+            allow_agent=params["allow_agent"],
             key_filename=params["key_filename"],
             passphrase=params["passphrase"],
         )

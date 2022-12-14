@@ -8,6 +8,7 @@ import paramiko
 from paramiko.client import SSHClient
 
 from fs_task_queue.core import Queue, JSONSerializer, DummyLock, Job, JobStatus
+from fs_task_queue.utils import eval_boolean_env_var
 
 
 class SSHJob(Job):

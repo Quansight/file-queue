@@ -10,7 +10,8 @@ def timer(logger, prefix: str):
     yield
     logger.info(f"Finished {prefix} took {time.time() - start_time:.2f} [s]")
 
-def eval_boolean_env_var(variable:str, default:bool):
+
+def eval_boolean_env_var(variable: str, default: bool):
     """
     Attempt to evaluate a boolean environment variable according to its value.
 
@@ -28,9 +29,9 @@ def eval_boolean_env_var(variable:str, default:bool):
     value = os.getenv(variable)
 
     if value:
-        if value.lower() in ['true', '1']:
+        if value.lower() in ["true", "1"]:
             return True
-        elif value.lower() in ['false', '0']:
+        elif value.lower() in ["false", "0"]:
             return False
         else:
             raise ValueError(f"Invalid value for {variable}")

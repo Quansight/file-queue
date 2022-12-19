@@ -103,17 +103,22 @@ class Job:
             result = func(*args, **kwargs)
             self.set_status(JobStatus.FINISHED)
             with (self.queue.result_directory / self.id).open("wb") as f:
-                f.write(self.queue.result_serializer.dumps({
-                    "return_value": result,
-                    "exc_string": None,
-                }))
+                f.write(
+                    self.queue.result_serializer.dumps(
+                        {
+                            "return_value": result,
+                            "exc_string": None,
+                        }
+                    )
+                )
         except Exception:
             self.set_status(JobStatus.FAILED)
             with (self.queue.result_directory / self.id).open("w") as f:
-                f.write(self.queue.result_serializer.dumps({
-                    "return_value": None,
-                    "exc_string": traceback.format_exc()
-                }))
+                f.write(
+                    self.queue.result_serializer.dumps(
+                        {"return_value": None, "exc_string": traceback.format_exc()}
+                    )
+                )
 
     @property
     def result(self):

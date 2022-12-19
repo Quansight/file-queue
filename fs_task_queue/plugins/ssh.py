@@ -43,7 +43,11 @@ class SSHJob(Job):
             with self.queue._sftp_client.open(
                 str(self.queue.result_directory / self.id), "rb"
             ) as f:
-                return self.queue.result_serializer.loads(f.read())
+                result_object = self.queue.result_serializer.loads(f.read())
+                if result_object.get("exc_string") is not None:
+                    raise Exception(result_object.get("exc_string"))
+                else:
+                    return result_object["return_value"]
 
 
 class SSHQueue(Queue):

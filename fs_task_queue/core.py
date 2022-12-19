@@ -113,7 +113,7 @@ class Job:
                 )
         except Exception:
             self.set_status(JobStatus.FAILED)
-            with (self.queue.result_directory / self.id).open("w") as f:
+            with (self.queue.result_directory / self.id).open("wb") as f:
                 f.write(
                     self.queue.result_serializer.dumps(
                         {"return_value": None, "exc_string": traceback.format_exc()}

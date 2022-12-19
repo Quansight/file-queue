@@ -1,3 +1,9 @@
+# [0.1.6] 12/19/2022
+
+## Fixed
+
+ - issue with how errors are captured
+
 # [0.1.5] 12/12/2022
 
 ## Fixed

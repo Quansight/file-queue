@@ -107,7 +107,7 @@ class Job:
         except Exception:
             self.set_status(JobStatus.FAILED)
             with (self.queue.result_directory / self.id).open("w") as f:
-                f.write("".join(traceback.format_stack()))
+                f.write(traceback.format_exc())
 
     @property
     def result(self):

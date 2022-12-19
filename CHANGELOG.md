@@ -1,3 +1,9 @@
+# [0.1.7] 12/19/2022
+
+## Fixed
+
+ - issue with how errors and result values are decoded we now follow rq pattern
+
 # [0.1.6] 12/19/2022
 
 ## Fixed

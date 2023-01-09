@@ -149,7 +149,7 @@ class Queue:
         lock_class=DummyLock,
         job_class=Job,
     ):
-        self.directory = pathlib.Path(directory).resolve()
+        self.directory = pathlib.Path(directory)
         self.job_serializer = job_serializer_class()
         self.result_serializer = result_serializer_class()
         self.lock = lock_class()

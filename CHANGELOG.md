@@ -1,3 +1,9 @@
+# [0.1.8] 01/11/2023
+
+## Fixed
+
+ - issue with trying to resolve paths over ssh
+
 # [0.1.7] 12/19/2022
 
 ## Fixed

@@ -92,6 +92,7 @@ class SSHQueue(Queue):
             port=params["port"],
             username=params["username"],
             password=params["password"],
+            compress=True,
             look_for_keys=params["look_for_keys"],
             allow_agent=params["allow_agent"],
             key_filename=params["key_filename"],

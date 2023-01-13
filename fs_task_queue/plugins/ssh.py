@@ -11,6 +11,40 @@ from fs_task_queue.core import Queue, JSONSerializer, DummyLock, Job, JobStatus
 from fs_task_queue.utils import eval_boolean_env_var
 
 
+def create_ssh_client(directory: str):
+    if not directory.startswith("ssh://"):
+        raise ValueError("directory must start with ssh://")
+
+    p = urllib.parse.urlparse(directory)
+    params = {
+        "hostname": p.hostname,
+        "port": int(p.port or 22),
+        "username": p.username or os.getlogin(),
+        "password": p.password,
+        "key_filename": os.environ.get("PARAMIKO_SSH_KEYFILE"),
+        "passphrase": os.environ.get("PARAMIKO_SSH_PASSPHRASE"),
+        "allow_agent": eval_boolean_env_var("PARAMIKO_SSH_ALLOW_AGENT", True),
+        "look_for_keys": eval_boolean_env_var("PARAMIKO_SSH_LOOK_FOR_KEYS", True),
+        "path": p.path,
+    }
+
+    ssh_client = SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh_client.connect(
+        hostname=params["hostname"],
+        port=params["port"],
+        username=params["username"],
+        password=params["password"],
+        compress=True,
+        look_for_keys=params["look_for_keys"],
+        allow_agent=params["allow_agent"],
+        key_filename=params["key_filename"],
+        passphrase=params["passphrase"],
+    )
+    sftp_client = ssh_client.open_sftp()
+    return ssh_client, sftp_client, pathlib.Path(params["path"])
+
+
 class SSHJob(Job):
     @property
     def _meta(self):
@@ -59,7 +93,7 @@ class SSHQueue(Queue):
         lock_class=DummyLock,
         job_class=SSHJob,
     ):
-        directory = self._create_client(directory)
+        self._ssh_client, self._sftp_client, directory = create_ssh_client(directory)
         super().__init__(
             directory=directory,
             job_serializer_class=job_serializer_class,
@@ -67,39 +101,6 @@ class SSHQueue(Queue):
             lock_class=lock_class,
             job_class=job_class,
         )
-
-    def _create_client(self, directory):
-        if not directory.startswith("ssh://"):
-            raise ValueError("directory must start with ssh://")
-
-        p = urllib.parse.urlparse(directory)
-        params = {
-            "hostname": p.hostname,
-            "port": int(p.port or 22),
-            "username": p.username or os.getlogin(),
-            "password": p.password,
-            "key_filename": os.environ.get("PARAMIKO_SSH_KEYFILE"),
-            "passphrase": os.environ.get("PARAMIKO_SSH_PASSPHRASE"),
-            "allow_agent": eval_boolean_env_var("PARAMIKO_SSH_ALLOW_AGENT", True),
-            "look_for_keys": eval_boolean_env_var("PARAMIKO_SSH_LOOK_FOR_KEYS", True),
-            "path": p.path,
-        }
-
-        self._ssh_client = SSHClient()
-        self._ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self._ssh_client.connect(
-            hostname=params["hostname"],
-            port=params["port"],
-            username=params["username"],
-            password=params["password"],
-            compress=True,
-            look_for_keys=params["look_for_keys"],
-            allow_agent=params["allow_agent"],
-            key_filename=params["key_filename"],
-            passphrase=params["passphrase"],
-        )
-        self._sftp_client = self._ssh_client.open_sftp()
-        return pathlib.Path(params["path"])
 
     def ensure_directories(self):
         commands = []

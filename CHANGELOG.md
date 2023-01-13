@@ -1,3 +1,9 @@
+# [0.1.9] 01/13/2023
+
+## Changed
+
+ - made create_ssh_client a separate function
+
 # [0.1.8] 01/11/2023
 
 ## Fixed
